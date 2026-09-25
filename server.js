@@ -1,35 +1,30 @@
 require('dotenv').config();
-const crypto = require('crypto');
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
+const rateLimit = require('express-rate-limit');
 const contactRoutes = require('./routes/contact');
+const {
+  ADMIN_SESSION_NAME,
+  createAdminSession,
+  getAdminConfig,
+  isValidAdminSession,
+  safeEqual,
+} = require('./utils/adminSession');
 
 const app = express();
 const PORT = process.env.PORT || 4000;
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
-const ADMIN_SESSION_SECRET = process.env.ADMIN_SESSION_SECRET;
-const ADMIN_SESSION_NAME = 'eagle_admin_session';
-
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || '')
   .split(',')
   .map((s) => s.trim())
   .filter(Boolean);
 
-function signSession(value) {
-  return crypto.createHmac('sha256', ADMIN_SESSION_SECRET).update(value).digest('hex');
-}
-
-function isValidAdminSession(req) {
-  const cookieHeader = req.headers.cookie || '';
-  const match = cookieHeader.split(';').map((part) => part.trim()).find((part) => part.startsWith(`${ADMIN_SESSION_NAME}=`));
-  if (!match) return false;
-
-  const rawValue = decodeURIComponent(match.split('=')[1] || '');
-  const [token, signature] = rawValue.split('.');
-  if (!token || !signature) return false;
-  return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(signSession(token))) && token === ADMIN_PASSWORD;
-}
+const adminLoginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 app.use(
   cors({
@@ -47,14 +42,18 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/api/health', (req, res) => res.json({ ok: true, service: 'cleaning-company' }));
 
-app.post('/api/admin/login', (req, res) => {
+app.post('/api/admin/login', adminLoginLimiter, (req, res) => {
+  const adminConfig = getAdminConfig();
+  if (!adminConfig) {
+    return res.status(503).json({ ok: false, error: 'Admin login is not configured. Set ADMIN_PASSWORD and ADMIN_SESSION_SECRET.' });
+  }
+
   const submitted = String(req.body?.password || '').trim();
-  if (submitted !== ADMIN_PASSWORD) {
+  if (!safeEqual(submitted, adminConfig.password)) {
     return res.status(401).json({ ok: false, error: 'Incorrect password.' });
   }
 
-  const token = `${ADMIN_PASSWORD}.${signSession(ADMIN_PASSWORD)}`;
-  res.cookie(ADMIN_SESSION_NAME, token, {
+  res.cookie(ADMIN_SESSION_NAME, createAdminSession(adminConfig.secret), {
     httpOnly: true,
     sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production',

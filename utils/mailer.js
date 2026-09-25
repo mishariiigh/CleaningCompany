@@ -31,7 +31,8 @@ function getTransporter() {
 async function sendQuoteNotification(submission) {
   const t = getTransporter();
   const subject = `New quote request from ${submission.name}`;
-  const adminUrl = 'http://localhost:4000/admin';
+  const appUrl = process.env.APP_URL || 'http://localhost:4000';
+  const adminUrl = `${appUrl.replace(/\/$/, '')}/admin`;
   const body = [
     `Name: ${submission.name}`,
     `Email: ${submission.email}`,

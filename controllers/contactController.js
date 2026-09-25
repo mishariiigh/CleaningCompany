@@ -39,7 +39,7 @@ async function submitQuoteRequest(req, res) {
   }
 
   try {
-    const record = submissionStore.save(data);
+    const record = await submissionStore.save(data);
     const mailResult = await sendQuoteNotification(data);
 
     return res.status(201).json({
@@ -49,13 +49,22 @@ async function submitQuoteRequest(req, res) {
     });
   } catch (err) {
     console.error('[contact] failed to process submission:', err);
+    if (err.code === 'STORAGE_CONFIG') {
+      return res.status(503).json({ ok: false, error: err.message });
+    }
     return res.status(500).json({ ok: false, error: 'Something went wrong. Please try again shortly.' });
   }
 }
 
-function listSubmissions(req, res) {
-  const all = submissionStore.readAll();
-  res.json({ ok: true, count: all.length, submissions: all });
+async function listSubmissions(req, res) {
+  try {
+    const all = await submissionStore.readAll();
+    return res.json({ ok: true, count: all.length, submissions: all });
+  } catch (err) {
+    console.error('[contact] failed to list submissions:', err);
+    const status = err.code === 'STORAGE_CONFIG' ? 503 : 500;
+    return res.status(status).json({ ok: false, error: err.message || 'Unable to load submissions.' });
+  }
 }
 
 module.exports = { submitQuoteRequest, listSubmissions };
