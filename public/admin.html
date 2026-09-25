@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Clean Eagle Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --bg: #f4f8f6;
+        --panel: #ffffff;
+        --primary: #0d7a5d;
+        --primary-dark: #095d47;
+        --line: #dfeae4;
+        --text: #1d2826;
+        --muted: #5b6b66;
+      }
+
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: 'Inter', sans-serif;
+        background: var(--bg);
+        color: var(--text);
+      }
+
+      .container {
+        width: min(1100px, calc(100% - 2rem));
+        margin: 0 auto;
+      }
+
+      header {
+        background: #0d201b;
+        color: #fff;
+      }
+
+      .topbar {
+        min-height: 78px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        font-weight: 700;
+      }
+
+      .brand-mark {
+        display: inline-flex;
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, var(--primary), #2ca57d);
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+      }
+
+      .nav-links a {
+        color: #d8efe9;
+        text-decoration: none;
+      }
+
+      .page {
+        padding: 2rem 0 4rem;
+      }
+
+      .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+      }
+
+      .summary-card {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 1.3rem;
+        box-shadow: 0 12px 26px rgba(10, 23, 18, 0.04);
+      }
+
+      .summary-card span {
+        display: block;
+        color: var(--muted);
+        margin-bottom: 0.6rem;
+      }
+
+      .summary-card strong {
+        font-size: clamp(1.8rem, 3vw, 2.6rem);
+        color: var(--primary-dark);
+      }
+
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        box-shadow: 0 12px 26px rgba(10, 23, 18, 0.04);
+        overflow: hidden;
+      }
+
+      .panel-head {
+        padding: 1.2rem 1.3rem;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+      }
+
+      .panel-head h2 {
+        margin: 0;
+        font-size: 1.3rem;
+      }
+
+      .status-badge {
+        display: inline-block;
+        padding: 0.45rem 0.75rem;
+        border-radius: 999px;
+        background: #eaf7f2;
+        color: var(--primary-dark);
+        font-weight: 700;
+      }
+
+      .table-wrap {
+        overflow-x: auto;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th, td {
+        text-align: left;
+        padding: 1rem 1.3rem;
+        border-bottom: 1px solid var(--line);
+        vertical-align: top;
+      }
+
+      th {
+        background: #f9fbfa;
+        color: var(--muted);
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .empty {
+        padding: 2rem 1.3rem;
+        color: var(--muted);
+      }
+
+      @media (max-width: 760px) {
+        .summary-grid {
+          grid-template-columns: 1fr;
+        }
+        .topbar {
+          flex-direction: column;
+          align-items: flex-start;
+          padding: 1rem 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="container topbar">
+        <div class="brand">
+          <span class="brand-mark">EC</span>
+          <span>Eagle Cleaning Co. Admin</span>
+        </div>
+        <nav class="nav-links" aria-label="Admin navigation">
+          <a href="/">Back to site</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="page">
+      <div class="container">
+        <div id="login-panel" class="panel" style="padding:2rem; max-width: 480px; margin: 0 auto; display:none;">
+          <h2 style="margin-top:0;">Admin login</h2>
+          <p style="color: var(--muted); margin-bottom: 1.5rem;">Use the business admin password to access lead submissions.</p>
+          <form id="admin-login-form">
+            <label style="display:grid; gap:0.5rem; margin-bottom:1rem; font-weight:600;">
+              <span>Password</span>
+              <input id="admin-password" type="password" placeholder="Enter admin password" required style="padding: 0.9rem 1rem; border:1px solid var(--line); border-radius:12px; font:inherit;" />
+            </label>
+            <button type="submit" style="width:100%; background: var(--primary); color:#fff; border:none; border-radius:12px; padding: 0.9rem 1rem; font:inherit; font-weight:700; cursor:pointer;">Login</button>
+            <div id="login-status" style="min-height: 1.5rem; margin-top: 1rem; font-weight: 600; color: var(--muted);"></div>
+          </form>
+        </div>
+
+        <div id="admin-content" style="display:none;">
+          <div class="summary-grid">
+            <div class="summary-card">
+              <span>Total leads</span>
+              <strong id="total-leads">0</strong>
+            </div>
+            <div class="summary-card">
+              <span>Recent service</span>
+              <strong id="top-service">—</strong>
+            </div>
+            <div class="summary-card">
+              <span>Last received</span>
+              <strong id="last-date">—</strong>
+            </div>
+          </div>
+
+          <section class="panel">
+            <div class="panel-head">
+              <h2>Quote requests</h2>
+              <span class="status-badge">Live</span>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Service</th>
+                    <th>Message</th>
+                    <th>Received</th>
+                  </tr>
+                </thead>
+                <tbody id="submission-body"></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      function showLogin() {
+        document.getElementById('login-panel').style.display = 'block';
+        document.getElementById('admin-content').style.display = 'none';
+      }
+
+      function showAdmin() {
+        document.getElementById('login-panel').style.display = 'none';
+        document.getElementById('admin-content').style.display = 'block';
+      }
+
+      async function loginAdmin(event) {
+        event.preventDefault();
+        const input = document.getElementById('admin-password');
+        const status = document.getElementById('login-status');
+        const password = input.value.trim();
+
+        status.textContent = 'Checking password...';
+        status.style.color = 'var(--muted)';
+
+        try {
+          const response = await fetch('/api/admin/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password }),
+            credentials: 'same-origin'
+          });
+
+          const result = await response.json();
+
+          if (!response.ok || !result.ok) {
+            throw new Error(result.error || 'Invalid password');
+          }
+
+          status.textContent = 'Login successful.';
+          status.style.color = 'var(--primary-dark)';
+          showAdmin();
+          loadSubmissions();
+        } catch (error) {
+          status.textContent = error.message || 'Incorrect password.';
+          status.style.color = '#b42318';
+          input.focus();
+        }
+      }
+
+      async function loadSubmissions() {
+        try {
+          const response = await fetch('/api/contact', { credentials: 'same-origin' });
+          const result = await response.json();
+
+          if (!response.ok || !result.ok) {
+            if (response.status === 401) {
+              showLogin();
+              return;
+            }
+            throw new Error(result.error || 'Unable to load submissions');
+          }
+
+          const submissions = result.submissions || [];
+          const body = document.getElementById('submission-body');
+
+          showAdmin();
+
+          if (!submissions.length) {
+            body.innerHTML = '<tr><td colspan="6" class="empty">No quote requests yet.</td></tr>';
+            document.getElementById('total-leads').textContent = '0';
+            document.getElementById('top-service').textContent = '—';
+            document.getElementById('last-date').textContent = '—';
+            return;
+          }
+
+          const counts = {};
+          for (const item of submissions) {
+            counts[item.service] = (counts[item.service] || 0) + 1;
+          }
+
+          const topService = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
+          const latest = submissions.slice().sort((a, b) => new Date(b.receivedAt) - new Date(a.receivedAt))[0];
+
+          document.getElementById('total-leads').textContent = submissions.length;
+          document.getElementById('top-service').textContent = topService ? topService[0] : '—';
+          document.getElementById('last-date').textContent = latest ? new Date(latest.receivedAt).toLocaleString() : '—';
+
+          body.innerHTML = submissions.slice().reverse().map((item) => `
+            <tr>
+              <td>${escapeHtml(item.name || '—')}</td>
+              <td>${escapeHtml(item.email || '—')}</td>
+              <td>${escapeHtml(item.phone || '—')}</td>
+              <td>${escapeHtml(item.service || '—')}</td>
+              <td>${escapeHtml(item.message || '—')}</td>
+              <td>${new Date(item.receivedAt).toLocaleString()}</td>
+            </tr>
+          `).join('');
+        } catch (error) {
+          document.getElementById('submission-body').innerHTML = '<tr><td colspan="6" class="empty">Failed to load submissions.</td></tr>';
+          console.error(error);
+        }
+      }
+
+      function escapeHtml(value) {
+        return String(value)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
+      }
+
+      document.getElementById('admin-login-form').addEventListener('submit', loginAdmin);
+      showLogin();
+      loadSubmissions();
+      setInterval(loadSubmissions, 15000);
+    </script>
+  </body>
+</html>
